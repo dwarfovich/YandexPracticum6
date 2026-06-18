@@ -6,10 +6,14 @@
 
 #include "logger.hpp"
 #include "task_dispatcher.hpp"
-
+#include "queue/bounded_queue.hpp"
+#include "queue/unbounded_queue.hpp"
 using namespace dispatcher;
 
 int main() {
+    dispatcher::queue::BoundedQueue q {5} ;
+    dispatcher::queue::UnboundedQueue uq;
+
     TaskDispatcher td(std::thread::hardware_concurrency());
     std::vector<std::jthread> threads;
 
