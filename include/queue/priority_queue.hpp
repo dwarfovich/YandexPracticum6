@@ -57,7 +57,6 @@ public:
     std::optional<std::function<void()>> pop() {
         std::unique_lock lock(mutex_);
 
-        std::println("Thread {} waits.", std::this_thread::get_id());
         has_tasks_.wait(
             lock, [this] { return !is_active_ || !high_priority_queue_->empty() || !normal_priority_queue_->empty(); });
 
