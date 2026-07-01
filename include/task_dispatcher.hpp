@@ -9,12 +9,20 @@
 namespace dispatcher {
 
 class TaskDispatcher {
-    // здесь ваш код
 public:
-    // TaskDispatcher(size_t thread_count, ?);
+    TaskDispatcher(size_t thread_count, const std::unordered_map<TaskPriority, queue::QueueOptions> &queue_options)
+        : queue_{std::make_shared<queue::PriorityQueue>(queue_options)} 
+        , thread_pool_{queue_, thread_count}
+    {}
+    ~TaskDispatcher() {}
 
-    void schedule(TaskPriority priority, std::function<void()> task);
-    ~TaskDispatcher();
+    void schedule(TaskPriority priority, std::function<void()> task) {
+        queue_->push(priority, task);
+    }
+
+private:
+    std::shared_ptr<queue::PriorityQueue> queue_;
+    thread_pool::ThreadPool thread_pool_;
 };
 
 }  // namespace dispatcher
