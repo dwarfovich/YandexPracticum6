@@ -12,10 +12,12 @@ public:
     ~UnboundedQueue() override = default;
 
     void push(std::function<void()> task) override {
-            queue_.push(std::move(task));
+        std::lock_guard lock{mutex_};
+        queue_.push(std::move(task));
     }
 
     std::optional<std::function<void()>> try_pop() noexcept override {
+        std::lock_guard lock{mutex_};
         if (queue_.empty()) {
             return {};
         } else {
@@ -26,9 +28,13 @@ public:
         }
     }
 
-    bool empty() const noexcept override { return queue_.empty(); }
+    bool empty() const noexcept override {
+        std::lock_guard lock{mutex_};
+        return queue_.empty();
+    }
 
 private:
+    mutable std::mutex mutex_;
     std::queue<std::function<void()>> queue_;
 };
 

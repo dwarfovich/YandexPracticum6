@@ -9,10 +9,12 @@ namespace dispatcher::queue {
 
 class BoundedQueue : public IQueue {
 public:
-    explicit BoundedQueue(std::size_t capacity) : capacity_{capacity} {}
+    explicit BoundedQueue(std::size_t capacity) : capacity_{capacity}{
+    }
     ~BoundedQueue() override = default;
 
     void push(std::function<void()> task) override {
+        std::lock_guard lock {mutex_};
         if (queue_.size() < capacity_){
             queue_.push(std::move(task));
         } else {
@@ -21,6 +23,7 @@ public:
     }
 
     std::optional<std::function<void()>> try_pop() noexcept override {
+        std::lock_guard lock{mutex_};
         if (queue_.empty()) {
             return {};
         } else {
@@ -32,9 +35,11 @@ public:
     }
 
     bool empty() const noexcept override {
+        std::lock_guard lock{mutex_};
         return queue_.empty();
     }
 private:
+    mutable std::mutex mutex_;
     const std::size_t capacity_;
     std::queue<std::function<void()>> queue_;
 };
